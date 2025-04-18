@@ -9,40 +9,20 @@ parser = argparse.ArgumentParser(
 )
 
 parser.add_argument(
-    "filename",
+    "command",
     type=str,
-    help="the file to be executed with pymon",
-    metavar="filename",
-)
-
-parser.add_argument(
-    "-p",
-    "--patterns",
-    type=str,
-    help='the file patterns to monitor. use once for each pattern. default "*.py"',
-    action="append",
-    default=["*.py"],
-    metavar="patterns",
+    help="the file to be executed or command to run with pymon",
+    metavar="command",
 )
 
 parser.add_argument(
     "-w",
     "--watch",
     type=str,
-    help='the directory to monitor for changes. default "."',
-    action="store",
-    default=".",
-    metavar="path",
-)
-
-parser.add_argument(
-    "-a",
-    "--args",
-    type=str,
-    help="arguments to pass on to the execution script. use once for each argument.",
+    help="paths/patterns to watch (e.g., 'src/*.py', 'data/**/*.json'). use once for each path/pattern. default is '*.py'",
     action="append",
-    default=[],
-    metavar="command",
+    default=["*.py"],
+    metavar="path_pattern",
 )
 
 parser.add_argument(
@@ -57,6 +37,24 @@ parser.add_argument(
     "--clean",
     help="runs pymon in clean mode (no logs, no commands)",
     action="store_true",
+)
+
+parser.add_argument(
+    "-i",
+    "--ignore",
+    type=str,
+    help="patterns of files/paths to ignore. use once for each pattern.",
+    action="append",
+    default=[],
+    metavar="patterns",
+)
+
+parser.add_argument(
+    "-x",
+    "--exec",
+    help="execute a shell command instead of running a Python file",
+    action="store_true",
+    default=False,
 )
 
 
