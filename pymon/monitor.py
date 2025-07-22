@@ -76,7 +76,8 @@ class Monitor:
         self.watch_items = []
         self.patterns = []
         
-        for path_pattern in arguments.watch:
+        watch_patterns = arguments.watch if arguments.watch else ['*.py']
+        for path_pattern in watch_patterns:
             directory, pattern = self._parse_watch_path(path_pattern)
             self.patterns.append(pattern)
             self.watch_items.append((directory, pattern))

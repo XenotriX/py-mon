@@ -21,7 +21,7 @@ parser.add_argument(
     type=str,
     help="paths/patterns to watch (e.g., 'src/*.py', 'data/**/*.json'). use once for each path/pattern. default is '*.py'",
     action="append",
-    default=["*.py"],
+    default=None,
     metavar="path_pattern",
 )
 
