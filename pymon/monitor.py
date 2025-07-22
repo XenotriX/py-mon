@@ -6,7 +6,7 @@ from sys import executable
 from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler, FileSystemEvent
-from threading import Lock
+from threading import Lock, Timer
 
 class Monitor:
     def _handle_event(self, event: FileSystemEvent):
@@ -20,13 +20,10 @@ class Monitor:
                     log(Color.CYAN, f"Ignoring change in {event.src_path}")
                 return
         
-        if not self.clean:
-            log(Color.YELLOW, "restarting due to changes detected...")
-
-            if self.debug:
-                log(Color.CYAN, f"{event.event_type} {event.src_path}")
-
-        self.restart_process()
+        if self.timer:
+            self.timer.cancel()
+        self.timer = Timer(self.timeout, self.restart_process)
+        self.timer.start()
     
     def _matches_pattern(self, path: str, pattern: str) -> bool:
         """
@@ -72,8 +69,10 @@ class Monitor:
         self.clean = arguments.clean
         self.exec_mode = arguments.exec
         self.ignore_patterns = arguments.ignore
-        self.mutex = Lock()
+        self.timeout = arguments.timeout / 1000
 
+        self.mutex = Lock()
+        self.timer = None
         self.watch_items = []
         self.patterns = []
         
@@ -137,6 +136,16 @@ class Monitor:
         """
         Restart the process.
         """
+
+        with self.mutex:
+            if self.process is None:
+                return
+
+        if not self.clean:
+            log(Color.YELLOW, "restarting due to changes detected...")
+
+            if self.debug:
+                log(Color.CYAN, f"{event.event_type} {event.src_path}")
 
         self.stop_process()
         self.start_process()

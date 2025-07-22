@@ -57,6 +57,15 @@ parser.add_argument(
     default=False,
 )
 
+parser.add_argument(
+    "-t",
+    "--timeout",
+    type=int,
+    help="time in milliseconds to wait after file change",
+    default=30,
+    metavar="ms",
+)
+
 
 def main():
     colorama.init()
