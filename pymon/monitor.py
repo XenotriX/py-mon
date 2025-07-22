@@ -6,8 +6,7 @@ from sys import executable
 from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler, FileSystemEvent
-
-
+from threading import Lock
 
 class Monitor:
     def _handle_event(self, event: FileSystemEvent):
@@ -73,6 +72,7 @@ class Monitor:
         self.clean = arguments.clean
         self.exec_mode = arguments.exec
         self.ignore_patterns = arguments.ignore
+        self.mutex = Lock()
 
         self.watch_items = []
         self.patterns = []
@@ -142,6 +142,13 @@ class Monitor:
         self.start_process()
 
     def start_process(self):
+        self.mutex.acquire()
+
+        if self.process:
+            self.mutex.release()
+            return
+
+
         if not self.clean:
             log(Color.GREEN, f"starting {self.command}")
         
@@ -153,12 +160,22 @@ class Monitor:
             py_command = self.command + (".py" if not self.command.endswith(".py") else "")
             self.process = subprocess.Popen([executable, py_command])
 
+        self.mutex.release()
+
     def stop_process(self):
         """
         Stop the process.
         """
 
+        self.mutex.acquire()
+
+        if not self.process:
+            self.mutex.release()
+            return
+
         if self.process:
             self.process.terminate()
             self.process.wait()
             self.process = None
+
+        self.mutex.release()
